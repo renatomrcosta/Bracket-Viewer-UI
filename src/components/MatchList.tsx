@@ -1,43 +1,34 @@
 import React from 'react';
-import { GamepadIcon } from 'lucide-react';
+import { GameColumn } from './GameColumn';
 import { useMatches } from '../context/MatchContext';
 import { GAMES } from '../constants/games';
+import { getLatestMatches } from '../utils/matchUtils';
 
 export function MatchList() {
-  const { matches } = useMatches();
+    const { matches } = useMatches();
 
-  return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
-      <h1 className="text-4xl font-bold text-center mb-8">Active Matches</h1>
-      
-      <div className="grid grid-cols-3 gap-8">
-        {GAMES.map((game) => (
-          <div key={game} className="bg-gray-800 rounded-lg p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <GamepadIcon className="w-6 h-6" />
-              <h2 className="text-2xl font-bold">{game}</h2>
-            </div>
-            
-            <div className="space-y-4">
-              {matches
-                .filter((match) => match.game === game)
-                .map((match) => (
-                  <div
-                    key={match.id}
-                    className="bg-gray-700 p-4 rounded-lg"
-                  >
-                    <div className="text-lg font-semibold mb-2">
-                      {match.player1} vs {match.player2}
-                    </div>
-                    <div className="text-sm text-gray-400">
-                      Station {match.station}
-                    </div>
-                  </div>
+    const activeGames = GAMES.filter(game =>
+        getLatestMatches(matches, game).length > 0
+    );
+
+    const columns = Math.min(activeGames.length, 3);
+    const gridCols = columns === 1 ? 'grid-cols-1' :
+        columns === 2 ? 'grid-cols-2' :
+            'grid-cols-3';
+
+    return (
+        <div className="min-h-screen bg-gray-900 text-white p-8">
+            <h1 className="text-4xl font-bold text-center mb-8">Active Matches</h1>
+
+            <div className={`grid ${gridCols} gap-8 auto-rows-fr`}>
+                {activeGames.map((game) => (
+                    <GameColumn
+                        key={game}
+                        game={game}
+                        matches={getLatestMatches(matches, game)}
+                    />
                 ))}
             </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+        </div>
+    );
 }
