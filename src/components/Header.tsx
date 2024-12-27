@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { ThemeToggle } from './ThemeToggle';
+import {Link} from 'react-router-dom';
+import {ThemeToggle} from './ThemeToggle';
 
 export function Header() {
     return (
@@ -14,7 +14,7 @@ export function Header() {
                 </Link>
 
                 <div className="flex items-center gap-4">
-                    <ThemeToggle />
+                    <ThemeToggle/>
                     <Link to="/add">
                         <img
                             src="/logos/bka.png"
