@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { Match } from '../types/match';
 import { useBroadcastChannel } from '../hooks/useBroadcastChannel';
+import { GRID_CONFIG } from '../constants/config';
 
 type MatchContextType = {
   matches: Match[];
@@ -13,7 +14,10 @@ export function MatchProvider({ children }: { children: React.ReactNode }) {
   const [matches, setMatches] = useState<Match[]>([]);
 
   const handleMatchAdded = useCallback((match: Match) => {
-    setMatches(prev => [match, ...prev]);
+    setMatches(prev => {
+      const newMatches = [match, ...prev];
+      return newMatches.slice(0, GRID_CONFIG.MAX_MATCHES);
+    });
   }, []);
 
   const { broadcastMatch } = useBroadcastChannel(handleMatchAdded);
@@ -24,9 +28,9 @@ export function MatchProvider({ children }: { children: React.ReactNode }) {
       id: crypto.randomUUID(),
       status: 'active',
     };
-    setMatches(prev => [newMatch, ...prev]);
+    handleMatchAdded(newMatch);
     broadcastMatch(newMatch);
-  }, [broadcastMatch]);
+  }, [broadcastMatch, handleMatchAdded]);
 
   return (
       <MatchContext.Provider value={{ matches, addMatch }}>
