@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, {useRef, useState} from 'react';
 import { GamepadIcon, Loader2Icon } from 'lucide-react';
 import { useMatches } from '../context/MatchContext';
 import { GAMES } from '../constants/games';
 
 export function MatchForm() {
   const { addMatch } = useMatches();
+  const [focus, setFocus] = useState(true);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     game: GAMES[0],
@@ -16,7 +17,6 @@ export function MatchForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       addMatch({
         game: formData.game,
@@ -27,13 +27,14 @@ export function MatchForm() {
 
       // Reset form
       setFormData({
-        game: GAMES[0],
+        game: formData.game,
         player1: '',
         player2: '',
         station: '',
       });
     } finally {
       setLoading(false);
+      setFocus(true);
     }
   };
 
@@ -65,6 +66,12 @@ export function MatchForm() {
             <label className="block text-sm font-medium mb-2">Player 1</label>
             <input
               type="text"
+              ref={input => {
+                if (input && focus) {
+                  setFocus(false);
+                  input.focus();
+                }
+              }}
               value={formData.player1}
               onChange={(e) => setFormData({ ...formData, player1: e.target.value })}
               className="w-full bg-gray-800 rounded-lg p-3 focus:ring-2 focus:ring-blue-500"
