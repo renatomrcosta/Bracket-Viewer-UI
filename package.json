@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "go": "vite build && vite preview",
     "docker-build": "docker build -t tournament-tracker .",
-    "docker-run": "docker run -p 3000:80 -e GRID_COLUMNS=6 -e GRID_ROWS=4 -e MAX_MATCHES=24  tournament-tracker"
+    "docker-run": "docker run -p 3000:80 -e GRID_COLUMNS=3 -v $(pwd)/data:/data -e GRID_ROWS=3 -e MAX_MATCHES=9  tournament-tracker"
   },
   "dependencies": {
     "lucide-react": "^0.344.0",

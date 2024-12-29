@@ -1,4 +1,3 @@
-# Build stage
 FROM node:20-slim as builder
 
 WORKDIR /app
@@ -18,6 +17,9 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine
 
+# Create a directory for the SQLite database
+RUN mkdir -p /data
+
 # Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
@@ -30,6 +32,9 @@ EXPOSE 80
 # Add entrypoint script
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
+
+# Set volume for SQLite database
+VOLUME ["/data"]
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

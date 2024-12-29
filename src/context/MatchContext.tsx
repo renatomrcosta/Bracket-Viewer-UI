@@ -2,6 +2,7 @@ import React, {createContext, useCallback, useContext, useState} from 'react';
 import {Match} from '../types/match';
 import {useBroadcastChannel} from '../hooks/useBroadcastChannel';
 import {GRID_CONFIG} from '../constants/config';
+import {logMatch} from '../db/database';
 
 type MatchContextType = {
     matches: Match[];
@@ -19,6 +20,8 @@ export function MatchProvider({children}: { children: React.ReactNode }) {
             const newMatches = [match, ...prev];
             return newMatches.slice(0, GRID_CONFIG.MAX_MATCHES);
         });
+        // Log match to database
+        logMatch(match);
     }, []);
 
     const handleMatchRemoved = useCallback((matchId: string) => {
