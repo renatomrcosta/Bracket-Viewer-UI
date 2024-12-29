@@ -1,32 +1,38 @@
-import { useEffect, useCallback, useRef } from 'react';
-import { Match } from '../types/match';
+import {useCallback, useEffect, useRef} from 'react';
+import {Match} from '../types/match';
 
 const CHANNEL_NAME = 'tournament-matches';
 
-export function useBroadcastChannel(onMatchAdded: (match: Match) => void) {
+export function useBroadcastChannel(
+    onMatchAdded: (match: Match) => void,
+    onMatchRemoved: (matchId: string) => void
+) {
     const channelRef = useRef<BroadcastChannel | null>(null);
 
     useEffect(() => {
-        // Create the channel when the hook mounts
         channelRef.current = new BroadcastChannel(CHANNEL_NAME);
 
         const handleMessage = (event: MessageEvent) => {
-            if (event.data.type === 'MATCH_ADDED') {
-                onMatchAdded(event.data.payload);
+            switch (event.data.type) {
+                case 'MATCH_ADDED':
+                    onMatchAdded(event.data.payload);
+                    break;
+                case 'MATCH_REMOVED':
+                    onMatchRemoved(event.data.payload);
+                    break;
             }
         };
 
         channelRef.current.addEventListener('message', handleMessage);
 
         return () => {
-            // Clean up the channel when the hook unmounts
             if (channelRef.current) {
                 channelRef.current.removeEventListener('message', handleMessage);
                 channelRef.current.close();
                 channelRef.current = null;
             }
         };
-    }, [onMatchAdded]);
+    }, [onMatchAdded, onMatchRemoved]);
 
     const broadcastMatch = useCallback((match: Match) => {
         if (channelRef.current) {
@@ -37,5 +43,14 @@ export function useBroadcastChannel(onMatchAdded: (match: Match) => void) {
         }
     }, []);
 
-    return { broadcastMatch };
+    const broadcastRemoval = useCallback((matchId: string) => {
+        if (channelRef.current) {
+            channelRef.current.postMessage({
+                type: 'MATCH_REMOVED',
+                payload: matchId
+            });
+        }
+    }, []);
+
+    return {broadcastMatch, broadcastRemoval};
 }

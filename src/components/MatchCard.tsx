@@ -1,8 +1,9 @@
 import React from 'react';
-import { Match } from '../types/match';
-import { GAME_LOGOS } from '../constants/gameLogos';
-import { useCardAnimation } from '../hooks/useCardAnimation';
-import { MonitorIcon } from 'lucide-react';
+import {Match} from '../types/match';
+import {GAME_LOGOS} from '../constants/gameLogos';
+import {useCardAnimation} from '../hooks/useCardAnimation';
+import {MonitorIcon} from 'lucide-react';
+import {useMatches} from '../context/MatchContext';
 
 type MatchCardProps = {
     match: Match;
@@ -10,17 +11,24 @@ type MatchCardProps = {
     isLeaving: boolean;
 };
 
-export function MatchCard({ match, isNew, isLeaving }: MatchCardProps) {
-    const { isVisible, isBlinking } = useCardAnimation(isNew, isLeaving);
+export function MatchCard({match, isNew, isLeaving}: MatchCardProps) {
+    const {isVisible, isBlinking} = useCardAnimation(isNew, isLeaving);
+    const {removeMatch} = useMatches();
+
+    const handleDoubleClick = () => {
+        removeMatch(match.id);
+    };
 
     return (
         <div
+            onDoubleClick={handleDoubleClick}
             className={`
         w-[300px] h-[300px] bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative
-        transform transition-all duration-500 ease-out
+        transform transition-all duration-500 ease-out cursor-pointer
+        hover:scale-[1.02] active:scale-[0.98]
         ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
         ${isBlinking ? 'animate-soft-blink' : ''}
-        ${isLeaving ? 'animate-fade-out' : ''}
+        ${isLeaving ? 'animate-fade-out scale-95' : ''}
       `}
         >
             {/* Game Logo */}
@@ -36,8 +44,9 @@ export function MatchCard({ match, isNew, isLeaving }: MatchCardProps) {
 
             <div className="flex h-[calc(300px-96px)]">
                 {/* Station Number */}
-                <div className="w-20 border-r border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-2">
-                    <MonitorIcon className="w-8 h-8 text-gray-500 dark:text-gray-400" />
+                <div
+                    className="w-20 border-r border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-2">
+                    <MonitorIcon className="w-8 h-8 text-gray-500 dark:text-gray-400"/>
                     <span className="text-xl font-bold text-gray-500 dark:text-gray-400">
             {match.station}
           </span>

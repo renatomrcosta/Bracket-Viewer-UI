@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { MatchCard } from './MatchCard';
-import { GRID_CONFIG } from '../constants/config';
-import { useMatches } from '../context/MatchContext';
-import { Match } from '../types/match';
+import React, {useEffect, useState} from 'react';
+import {MatchCard} from './MatchCard';
+import {GRID_CONFIG} from '../constants/config';
+import {useMatches} from '../context/MatchContext';
+import {Match} from '../types/match';
 
 export function MatchGrid() {
-    const { matches } = useMatches();
+    const {matches} = useMatches();
     const [animatedMatches, setAnimatedMatches] = useState<Array<Match & { isNew?: boolean; isLeaving?: boolean }>>([]);
 
     useEffect(() => {
@@ -16,7 +16,7 @@ export function MatchGrid() {
             // Mark leaving matches
             const leaving = prev
                 .filter(m => !currentIds.has(m.id))
-                .map(m => ({ ...m, isLeaving: true }));
+                .map(m => ({...m, isLeaving: true}));
 
             // Add new matches
             const newMatches = matches
@@ -40,8 +40,6 @@ export function MatchGrid() {
 
     return (
         <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white p-8">
-            <h1 className="text-4xl font-bold text-center mb-8">Active Matches</h1>
-
             <div className="max-w-7xl mx-auto">
                 <div
                     className="grid gap-6 justify-items-center"
