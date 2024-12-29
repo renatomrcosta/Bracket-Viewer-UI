@@ -1,5 +1,9 @@
+import {getEnvironmentConfig} from "./environment.ts";
+
+const env = getEnvironmentConfig();
+
 export const GRID_CONFIG = {
-    COLUMNS: 3,
-    ROWS: 3,
-    MAX_MATCHES: 9, // COLUMNS * ROWS
+    COLUMNS: env.grid.columns,
+    ROWS: env.grid.rows,
+    MAX_MATCHES: env.grid.maxMatches,
 } as const;
