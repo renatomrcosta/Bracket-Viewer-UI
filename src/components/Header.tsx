@@ -18,16 +18,16 @@ export function Header() {
                 </Link>
 
                 <div className="flex items-center gap-4">
-                    <Link
-                        to="/history"
-                        className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                        aria-label="Match History"
-                    >
-                        <History className="w-5 h-5 text-gray-800 dark:text-gray-200"/>
-                    </Link>
                     <ThemeToggle/>
                     {user ? (
                         <>
+                            <Link
+                                to="/history"
+                                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                aria-label="Match History"
+                            >
+                                <History className="w-5 h-5 text-gray-800 dark:text-gray-200"/>
+                            </Link>
                             <Link to="/add">
                                 <button
                                     className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
@@ -44,10 +44,11 @@ export function Header() {
                         </>
                     ) : (
                         <Link to="/login">
-                            <button
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                                Sign In
-                            </button>
+                            <img
+                                src="/logos/bka.png"
+                                alt="BKA Logo (Click to login)"
+                                className="h-12 w-auto hover:opacity-80 transition-opacity"
+                            />
                         </Link>
                     )}
                 </div>
