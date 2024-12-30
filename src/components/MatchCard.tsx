@@ -4,6 +4,7 @@ import {GAME_LOGOS} from '../constants/gameLogos';
 import {useCardAnimation} from '../hooks/useCardAnimation';
 import {MonitorIcon} from 'lucide-react';
 import {useMatches} from '../context/MatchContext';
+import {useAuth} from "../context/AuthContext.tsx";
 
 type MatchCardProps = {
     match: Match;
@@ -14,9 +15,12 @@ type MatchCardProps = {
 export function MatchCard({match, isNew, isLeaving}: MatchCardProps) {
     const {isVisible, isBlinking} = useCardAnimation(isNew, isLeaving);
     const {removeMatch} = useMatches();
+    const {user} = useAuth();
 
     const handleDoubleClick = () => {
-        removeMatch(match.id);
+        if (user) {
+            removeMatch(match.id);
+        }
     };
 
     return (
