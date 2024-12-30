@@ -1,13 +1,13 @@
-import React, {createContext, useCallback, useContext, useState} from 'react';
+import React, {createContext, useCallback, useContext, useEffect, useState} from 'react';
 import {Match} from '../types/match';
 import {useBroadcastChannel} from '../hooks/useBroadcastChannel';
 import {GRID_CONFIG} from '../constants/config';
-import {logMatch} from '../db/database';
+import {addMatch as addMatchToFirestore, subscribeToActiveMatches, updateMatchStatus} from '../service/matchService';
 
 type MatchContextType = {
     matches: Match[];
-    addMatch: (match: Omit<Match, 'id' | 'status'>) => void;
-    removeMatch: (id: string) => void;
+    addMatch: (match: Omit<Match, 'id' | 'status'>) => Promise<void>;
+    removeMatch: (id: string) => Promise<void>;
 };
 
 const MatchContext = createContext<MatchContextType | undefined>(undefined);
@@ -15,33 +15,35 @@ const MatchContext = createContext<MatchContextType | undefined>(undefined);
 export function MatchProvider({children}: { children: React.ReactNode }) {
     const [matches, setMatches] = useState<Match[]>([]);
 
-    const handleMatchAdded = useCallback((match: Match) => {
-        setMatches(prev => {
-            const newMatches = [match, ...prev];
-            return newMatches.slice(0, GRID_CONFIG.MAX_MATCHES);
+    // Subscribe to active matches
+    useEffect(() => {
+        const unsubscribe = subscribeToActiveMatches((activeMatches) => {
+            setMatches(activeMatches.slice(0, GRID_CONFIG.MAX_MATCHES));
         });
-        // Log match to database
-        logMatch(match);
+
+        return () => unsubscribe();
     }, []);
 
-    const handleMatchRemoved = useCallback((matchId: string) => {
-        setMatches(prev => prev.filter(match => match.id !== matchId));
+    const handleMatchRemoved = useCallback(async (matchId: string) => {
+        try {
+            await updateMatchStatus(matchId, 'completed');
+        } catch (error) {
+            console.error('Error removing match:', error);
+        }
     }, []);
 
-    const {broadcastMatch, broadcastRemoval} = useBroadcastChannel(handleMatchAdded, handleMatchRemoved);
+    const {broadcastRemoval} = useBroadcastChannel(null, handleMatchRemoved);
 
-    const addMatch = useCallback((matchData: Omit<Match, 'id' | 'status'>) => {
-        const newMatch = {
-            ...matchData,
-            id: crypto.randomUUID(),
-            status: 'active',
-        };
-        handleMatchAdded(newMatch);
-        broadcastMatch(newMatch);
-    }, [broadcastMatch, handleMatchAdded]);
+    const addMatch = useCallback(async (matchData: Omit<Match, 'id' | 'status'>) => {
+        try {
+            await addMatchToFirestore(matchData);
+        } catch (error) {
+            console.error('Error adding match:', error);
+        }
+    }, []);
 
-    const removeMatch = useCallback((id: string) => {
-        handleMatchRemoved(id);
+    const removeMatch = useCallback(async (id: string) => {
+        await handleMatchRemoved(id);
         broadcastRemoval(id);
     }, [broadcastRemoval, handleMatchRemoved]);
 

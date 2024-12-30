@@ -5,7 +5,7 @@ import {useMatches} from '../context/MatchContext';
 import {Match} from '../types/match';
 
 export function MatchGrid() {
-    const {matches} = useMatches();
+    const {matches, removeMatch} = useMatches();
     const [animatedMatches, setAnimatedMatches] = useState<Array<Match & { isNew?: boolean; isLeaving?: boolean }>>([]);
 
     useEffect(() => {
@@ -17,6 +17,11 @@ export function MatchGrid() {
             const leaving = prev
                 .filter(m => !currentIds.has(m.id))
                 .map(m => ({...m, isLeaving: true}));
+
+            leaving.forEach((m) => {
+                removeMatch(m.id)
+            });
+
 
             // Add new matches
             const newMatches = matches

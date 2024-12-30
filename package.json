@@ -13,6 +13,7 @@
     "docker-run": "docker run -p 3000:80 -e GRID_COLUMNS=3 -v $(pwd)/data:/data -e GRID_ROWS=3 -e MAX_MATCHES=9  tournament-tracker"
   },
   "dependencies": {
+    "firebase": "^10.8.0",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

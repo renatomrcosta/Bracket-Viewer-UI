@@ -5,4 +5,5 @@ export type Match = {
     player2: string;
     station: number;
     status: string;
+    createdAt: Date;
 };

@@ -3,9 +3,12 @@ import {Match} from '../types/match';
 
 const CHANNEL_NAME = 'tournament-matches';
 
+type MatchHandler = ((match: Match) => void) | null;
+type MatchIdHandler = (matchId: string) => void;
+
 export function useBroadcastChannel(
-    onMatchAdded: (match: Match) => void,
-    onMatchRemoved: (matchId: string) => void
+    onMatchAdded: MatchHandler,
+    onMatchRemoved: MatchIdHandler
 ) {
     const channelRef = useRef<BroadcastChannel | null>(null);
 
@@ -15,7 +18,7 @@ export function useBroadcastChannel(
         const handleMessage = (event: MessageEvent) => {
             switch (event.data.type) {
                 case 'MATCH_ADDED':
-                    onMatchAdded(event.data.payload);
+                    onMatchAdded?.(event.data.payload);
                     break;
                 case 'MATCH_REMOVED':
                     onMatchRemoved(event.data.payload);
