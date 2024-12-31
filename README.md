@@ -30,6 +30,8 @@ To build an image, run:
 npm run docker-build
 ```
 
+To run locally at the moment, valid firebase environment variables must be provided in the .env
+
 ## Dockerized
 
 To run a dockerized version, pull the image and run using. The app will be accessible on port 3000

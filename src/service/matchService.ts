@@ -5,15 +5,18 @@ import {
     doc,
     DocumentData,
     getDocs,
+    limit,
     onSnapshot,
     orderBy,
     query,
     Timestamp,
     updateDoc,
-    where
+    where,
+    writeBatch
 } from 'firebase/firestore';
 import {db} from '../config/firebase';
 import {Match} from '../types/match';
+import {GRID_CONFIG} from '../constants/config';
 
 const MATCHES_COLLECTION = 'matches';
 
@@ -35,6 +38,29 @@ function convertToMatch(doc: DocumentData): Match {
     };
 }
 
+async function completeExcessMatches(): Promise<void> {
+    const activeMatchesQuery = query(
+        collection(db, MATCHES_COLLECTION),
+        where('status', '==', 'active'),
+        orderBy('createdAt', 'desc')
+    );
+
+    const snapshot = await getDocs(activeMatchesQuery);
+    const matches = snapshot.docs;
+
+    if (matches.length > GRID_CONFIG.MAX_MATCHES) {
+        const batch = writeBatch(db);
+
+        // Update all matches beyond the maximum limit
+        matches.slice(GRID_CONFIG.MAX_MATCHES).forEach((match) => {
+            const matchRef = doc(db, MATCHES_COLLECTION, match.id);
+            batch.update(matchRef, {status: 'completed'});
+        });
+
+        await batch.commit();
+    }
+}
+
 // Add new match
 export async function addMatch(match: Omit<Match, 'id' | 'status' | 'createdAt'>): Promise<string> {
     const matchData: FirestoreMatch = {
@@ -44,6 +70,7 @@ export async function addMatch(match: Omit<Match, 'id' | 'status' | 'createdAt'>
     };
 
     const docRef = await addDoc(collection(db, MATCHES_COLLECTION), matchData);
+    await completeExcessMatches();
     return docRef.id;
 }
 
@@ -63,7 +90,8 @@ export function subscribeToActiveMatches(callback: (matches: Match[]) => void): 
     const q = query(
         collection(db, MATCHES_COLLECTION),
         where('status', '==', 'active'),
-        orderBy('createdAt', 'desc')
+        orderBy('createdAt', 'desc'),
+        limit(GRID_CONFIG.MAX_MATCHES)
     );
 
     return onSnapshot(q, (snapshot) => {
