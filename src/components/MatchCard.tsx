@@ -41,7 +41,7 @@ export function MatchCard({match, isNew, isLeaving}: MatchCardProps) {
                     <img
                         src={GAME_LOGOS[match.game]}
                         alt={`${match.game} logo`}
-                        className="w-20 h-20 object-contain opacity-80"
+                        className="w-40 h-20 object-contain opacity-80"
                     />
                 </div>
             </div>
